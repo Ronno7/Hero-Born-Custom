@@ -95,7 +95,16 @@ public class Player : MonoBehaviour
         // Check if the player is grounded
         if (collision.gameObject.CompareTag("Ground"))
         {
-            isGrounded = true;
+            isGrounded = true; // Player is grounded
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        // Check if the player leaves the ground
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = false; // Player is in the air
         }
     }
 }
