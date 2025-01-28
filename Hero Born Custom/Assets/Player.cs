@@ -33,22 +33,22 @@ public class Player : MonoBehaviour
         // Movement input
         if (Input.GetKey(KeyCode.W))
         {
-            transform.position += transform.forward * 0.02f;
+            transform.position += transform.forward * 0.04f;
         }
 
         if (Input.GetKey(KeyCode.S))
         {
-            transform.position += -transform.forward * 0.02f;
+            transform.position += -transform.forward * 0.04f;
         }
 
         if (Input.GetKey(KeyCode.A))
         {
-            transform.position += -transform.right * 0.01f;
+            transform.position += -transform.right * 0.02f;
         }
 
         if (Input.GetKey(KeyCode.D))
         {
-            transform.position += transform.right * 0.01f;
+            transform.position += transform.right * 0.02f;
         }
     }
 
