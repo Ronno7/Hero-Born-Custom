@@ -10,45 +10,60 @@ public class Player : MonoBehaviour
     public float rotationSpeed = 5f; // Speed of rotation for the player and camera
     public float pitchMin = -30f; // Minimum vertical angle
     public float pitchMax = 60f; // Maximum vertical angle
+    public float moveSpeed = 5f; // Speed for player movement
+    public float rotationSmoothSpeed = 10f; // Smoothing factor for player rotation
+    public float jumpForce = 5f; // Force applied for jumping
 
     private float yaw = 0f; // Horizontal rotation angle
     private float pitch = 0f; // Vertical rotation angle
+    private Rigidbody rb; // Reference to the Rigidbody
+    private bool isGrounded = true; // Tracks whether the player is grounded
 
     void Start()
     {
+        // Get the Rigidbody component
+        rb = GetComponent<Rigidbody>();
+
         if (cameraTransform == null)
         {
             Debug.LogError("Camera Transform is not assigned.");
+        }
+
+        if (rb == null)
+        {
+            Debug.LogError("Rigidbody is not assigned to the player object.");
         }
     }
 
     void Update()
     {
-        HandleMovement();
         HandleCamera();
+    }
+
+    private void FixedUpdate()
+    {
+        HandleMovement();
     }
 
     private void HandleMovement()
     {
-        // Movement input
-        if (Input.GetKey(KeyCode.W))
-        {
-            transform.position += transform.forward * 0.04f;
-        }
+        // Get input for movement
+        float horizontal = Input.GetAxis("Horizontal"); // A/D or Left/Right arrow
+        float vertical = Input.GetAxis("Vertical");     // W/S or Up/Down arrow
 
-        if (Input.GetKey(KeyCode.S))
-        {
-            transform.position += -transform.forward * 0.04f;
-        }
+        // Calculate movement direction
+        Vector3 moveDirection = transform.forward * vertical + transform.right * horizontal;
+        moveDirection = moveDirection.normalized * moveSpeed;
 
-        if (Input.GetKey(KeyCode.A))
-        {
-            transform.position += -transform.right * 0.02f;
-        }
+        // Apply velocity to Rigidbody
+        Vector3 newVelocity = new Vector3(moveDirection.x, rb.velocity.y, moveDirection.z);
+        rb.velocity = newVelocity;
 
-        if (Input.GetKey(KeyCode.D))
+        // Jump when spacebar is pressed and the player is grounded
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
-            transform.position += transform.right * 0.02f;
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            isGrounded = false; // Set grounded to false until collision detection confirms landing
         }
     }
 
@@ -62,8 +77,9 @@ public class Player : MonoBehaviour
         pitch -= mouseY; // Inverted pitch control
         pitch = Mathf.Clamp(pitch, pitchMin, pitchMax); // Clamp vertical rotation
 
-        // Rotate the player based on the yaw
-        transform.rotation = Quaternion.Euler(0, yaw, 0);
+        // Rotate the player smoothly based on yaw
+        Quaternion targetRotation = Quaternion.Euler(0, yaw, 0);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSmoothSpeed);
 
         // Calculate the camera's position and rotation
         Quaternion cameraRotation = Quaternion.Euler(pitch, yaw, 0);
@@ -72,5 +88,14 @@ public class Player : MonoBehaviour
         // Smoothly move the camera
         cameraTransform.position = Vector3.Lerp(cameraTransform.position, desiredPosition, cameraSmoothSpeed);
         cameraTransform.LookAt(transform.position + Vector3.up * 1.5f); // Look slightly above the player
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        // Check if the player is grounded
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = true;
+        }
     }
 }
