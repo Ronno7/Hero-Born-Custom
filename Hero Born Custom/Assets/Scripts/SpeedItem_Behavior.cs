@@ -4,12 +4,16 @@ using UnityEngine;
 
 public class SpeedItemBehavior : MonoBehaviour
 {
+    private float speedMultiplier = 1.5f;
+    private float boostDuration = 5f;
+
     void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.name == "Player")
         {
-            Destroy(this.transform.gameObject);
-            Debug.Log("Speed Item collected");
+            collision.gameObject.GetComponent<PlayerBehavior>()?.ActivateSpeedBoost(speedMultiplier, boostDuration);
+            Destroy(this.gameObject);
+            Debug.Log("Speed Item collected - Speed Boost Activated!");
         }
     }
 }

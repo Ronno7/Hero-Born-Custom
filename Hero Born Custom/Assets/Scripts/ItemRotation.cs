@@ -4,17 +4,13 @@ using UnityEngine;
 
 public class ItemRotation : MonoBehaviour
 {
-    public int RotationSpeed = 100;
-    private Transform _itemTransform;
-    // Start is called before the first frame update
-    void Start()
-    {
-        _itemTransform = this.GetComponent<Transform>();
-    }
+    public float RotationSpeed = 100f;
+    public Vector3 RotationAxis = Vector3.up;  // Default to Y-axis rotation
+    public bool ReverseRotation = false;  // Option to reverse rotation direction
 
-    // Update is called once per frame
     void Update()
     {
-        _itemTransform.Rotate(RotationSpeed * Time.deltaTime, 0, 0);
+        float direction = ReverseRotation ? -1f : 1f; // Reverse if enabled
+        transform.Rotate(RotationAxis * RotationSpeed * direction * Time.deltaTime);
     }
 }
