@@ -3446,10 +3446,10 @@ MonoBehaviour:
   minDistance: 1
   maxDistance: 10
   zoomSpeed: 2
-  rightMouseXSpeed: 300
-  rightMouseYSpeed: 300
-  leftMouseXSpeed: 150
-  leftMouseYSpeed: 150
+  rightMouseXSpeed: 200
+  rightMouseYSpeed: 200
+  leftMouseXSpeed: 100
+  leftMouseYSpeed: 100
   autoAlignSpeed: 5
   yMinLimit: -20
   yMaxLimit: 80
