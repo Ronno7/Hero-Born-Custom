@@ -12,6 +12,7 @@ public class PlayerBehavior : MonoBehaviour
     public LayerMask GroundLayer;
     public GameObject Bullet;
     public float BulletSpeed = 100f;
+    public GameObject shieldObject;
 
     private float _vInput;
     private float _hInput;
@@ -20,14 +21,19 @@ public class PlayerBehavior : MonoBehaviour
     private bool _isJumping;
     private SphereCollider _col;
     private bool _isShooting;
-    private GameBehavior gameManager;
+    private GameBehavior _gameManager;
+    private bool shieldActive = false;
+    private Coroutine shieldRoutine;
 
     void Start()
     {
         _rb = GetComponent<Rigidbody>();
         _col = GetComponent<SphereCollider>();
+        _gameManager = GameObject.Find("Game Manager").GetComponent<GameBehavior>();
 
-        gameManager = FindObjectOfType<GameBehavior>();
+        // Ensure the shield is disabled initially.
+        if (shieldObject != null)
+            shieldObject.SetActive(false);
     }
 
     void Update()
@@ -84,7 +90,7 @@ public class PlayerBehavior : MonoBehaviour
         MoveSpeed *= multiplier;
         StrafeSpeed *= multiplier;
 
-        gameManager?.ShowSpeedBoost(true); // Show Speed Boost text if gameManager is not null
+        _gameManager?.ShowSpeedBoost(true); // Show Speed Boost text if gameManager is not null
 
         Debug.Log("Speed Boost Active!");
         Invoke("ResetSpeed", duration);
@@ -95,7 +101,7 @@ public class PlayerBehavior : MonoBehaviour
         MoveSpeed /= 2f;
         StrafeSpeed /= 2f;
 
-        gameManager?.ShowSpeedBoost(false); // Hide Speed Boost text if gameManager is not null
+        _gameManager?.ShowSpeedBoost(false); // Hide Speed Boost text if gameManager is not null
 
         Debug.Log("Speed Boost Ended.");
     }
@@ -104,7 +110,7 @@ public class PlayerBehavior : MonoBehaviour
     {
         JumpVelocity *= multiplier;
 
-        gameManager?.ShowJumpBoost(true); // Show Jump Boost text if gameManager is not null
+        _gameManager?.ShowJumpBoost(true); // Show Jump Boost text if gameManager is not null
 
         Debug.Log("Jump Boost Active!");
         Invoke("ResetJump", duration);
@@ -114,8 +120,67 @@ public class PlayerBehavior : MonoBehaviour
     {
         JumpVelocity /= 2f;
 
-        gameManager?.ShowJumpBoost(false); // Hide Jump Boost text if gameManager is not null
+        _gameManager?.ShowJumpBoost(false); // Hide Jump Boost text if gameManager is not null
 
         Debug.Log("Jump Boost Ended.");
+    }
+
+    public void ActivateShield()
+    {
+        if (shieldActive) return;
+
+        shieldActive = true;
+        if (shieldObject != null)
+            shieldObject.SetActive(true);
+
+        _gameManager?.ShowShield(true);  // Show Shield text
+
+        shieldRoutine = StartCoroutine(ShieldDuration());
+        Debug.Log("Shield Activated!");
+    }
+
+    private IEnumerator ShieldDuration()
+    {
+        yield return new WaitForSeconds(60f);
+        DeactivateShield();
+    }
+
+    public void DeactivateShield()
+    {
+        shieldActive = false;
+        if (shieldObject != null)
+            shieldObject.SetActive(false);
+
+        _gameManager?.ShowShield(false); // Hide Shield text
+
+        if (shieldRoutine != null)
+        {
+            StopCoroutine(shieldRoutine);
+            shieldRoutine = null;
+        }
+        Debug.Log("Shield Deactivated!");
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            if (shieldActive)
+            {
+                // Shield takes the hit and is consumed.
+                DeactivateShield();
+                Debug.Log("Shield absorbed enemy hit!");
+            }
+            else
+            {
+                _gameManager.HP -= 10;
+            }
+        }
+    }
+
+    public void IncreaseHealth(int amount)
+    {
+        _gameManager.HP += amount;
+        Debug.Log("Player health increased by " + amount);
     }
 }

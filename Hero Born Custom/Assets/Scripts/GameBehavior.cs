@@ -8,15 +8,21 @@ using UnityEngine.SceneManagement;
 public class GameBehavior : MonoBehaviour
 {
     private int _playerHP = 100;
-    public int MaxCoins = 3;
+    public int MaxCoins = 5;
     public Button WinButton;
-
+    public Button LossButton;
     public TMP_Text HealthText;
     public TMP_Text CoinText;
     public TMP_Text ProgressText;
     public TMP_Text SpeedBoostText;
     public TMP_Text JumpBoostText;
+    public TMP_Text ShieldText;
 
+    public void UpdateScene(string updatedText)
+    {
+        ProgressText.text = updatedText;
+        Time.timeScale = 0f;
+    }
 
     void Start()
     {
@@ -34,16 +40,17 @@ public class GameBehavior : MonoBehaviour
             CoinText.text = "Coins: " + Coins;
             if (_coinsCollected >= MaxCoins)
             {
-                ProgressText.text = "You've found all the coins!";
                 WinButton.gameObject.SetActive(true);
-                Time.timeScale = 0f;
+                UpdateScene("You've found all the coins!");
             }
             else
             {
                 ProgressText.text = "Coin found, only " + (MaxCoins - _coinsCollected) + " more to go!";
             }
+
         }
     }
+
     public void RestartScene()
     {
         SceneManager.LoadScene(0);
@@ -54,13 +61,22 @@ public class GameBehavior : MonoBehaviour
         get { return _playerHP; }
         set
         {
+            int previousHP = _playerHP;  // store the old HP
             _playerHP = value;
-            HealthText.text = "Health: " + HP;
+            HealthText.text = "Health: " + _playerHP;
+            if (_playerHP <= 0)
+            {
+                LossButton.gameObject.SetActive(true);
+                UpdateScene("You want another life with that?");
+            }
+            else if (_playerHP < previousHP)
+            {
+                ProgressText.text = "Ouch... that's got to hurt.";
+            }
             Debug.LogFormat("Lives: {0}", _playerHP);
         }
     }
 
-    // Method to show/hide Boost Text
     public void ShowSpeedBoost(bool isActive)
     {
         if (SpeedBoostText != null)
@@ -68,6 +84,7 @@ public class GameBehavior : MonoBehaviour
             SpeedBoostText.gameObject.SetActive(isActive);
         }
     }
+
     public void ShowJumpBoost(bool isActive)
     {
         if (JumpBoostText != null)
@@ -76,4 +93,11 @@ public class GameBehavior : MonoBehaviour
         }
     }
 
+    public void ShowShield(bool isActive)
+    {
+        if (ShieldText != null)
+        {
+            ShieldText.gameObject.SetActive(isActive);
+        }
+    }
 }

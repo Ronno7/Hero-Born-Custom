@@ -4,12 +4,18 @@ using UnityEngine;
 
 public class HealthItemBehavior : MonoBehaviour
 {
+    public int healthIncrease = 50;
+
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.name == "Player")
+        if (collision.gameObject.CompareTag("Player"))
         {
-            Destroy(this.transform.gameObject);
-            Debug.Log("+50 HP collected");
+            PlayerBehavior player = collision.gameObject.GetComponent<PlayerBehavior>();
+            if (player != null)
+            {
+                player.IncreaseHealth(healthIncrease);
+            }
+            Destroy(gameObject);
         }
     }
 }

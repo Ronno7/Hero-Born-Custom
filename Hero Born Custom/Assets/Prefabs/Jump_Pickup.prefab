@@ -12,11 +12,11 @@ GameObject:
   - component: {fileID: 5148958336108346381}
   - component: {fileID: 3972094854427238374}
   - component: {fileID: 9038113545768761750}
-  - component: {fileID: 999139645577163652}
   - component: {fileID: 6124862330050109206}
   - component: {fileID: 8697093139801614944}
   - component: {fileID: 217896734437558005}
   - component: {fileID: 560671968442273053}
+  - component: {fileID: 8285203542148644765}
   m_Layer: 0
   m_Name: Jump_Pickup
   m_TagString: Untagged
@@ -96,7 +96,7 @@ CapsuleCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7151158500886690924}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 33454507eebe1b140a3bd8a8b597dbe3, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -112,19 +112,6 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &999139645577163652
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7151158500886690924}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 57ae8b076b4f49d4f8f1aa127b9c1846, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  RotationSpeed: 100
 --- !u!95 &6124862330050109206
 Animator:
   serializedVersion: 5
@@ -133,7 +120,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7151158500886690924}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: b94c7c8ea16144a448ba2c05cbb3732c, type: 2}
   m_CullingMode: 0
@@ -219,7 +206,7 @@ ParticleSystem:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-  moveWithTransform: 0
+  moveWithTransform: 1
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
   randomSeed: 0
@@ -336,7 +323,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 0, g: 0.47880745, b: 1, a: 1}
+      maxColor: {r: 1, g: 0.6079833, b: 0, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -4955,3 +4942,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8cd16de6477fa0b47bc25093dbb96f75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!54 &8285203542148644765
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7151158500886690924}
+  serializedVersion: 4
+  m_Mass: 3
+  m_Drag: 0
+  m_AngularDrag: 0.1
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 112
+  m_CollisionDetection: 0
