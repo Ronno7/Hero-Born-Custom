@@ -47,7 +47,7 @@ public class PlayerBehavior : MonoBehaviour
         if (Input.GetKey(KeyCode.E)) _strafeInput = StrafeSpeed;  // Strafe right
 
         _isJumping |= Input.GetKeyDown(KeyCode.Space);
-        _isShooting |= Input.GetMouseButtonDown(0);
+        _isShooting |= Input.GetKeyDown(KeyCode.F);
     }
 
     void FixedUpdate()
