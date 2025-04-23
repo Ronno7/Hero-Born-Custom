@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody), typeof(SphereCollider))]
+[RequireComponent(typeof(Rigidbody), typeof(SphereCollider), typeof(AudioSource))]
 public class PlayerBehavior : MonoBehaviour
 {
     [Header("Movement Settings")]
@@ -16,31 +16,36 @@ public class PlayerBehavior : MonoBehaviour
     public GameObject bullet;
     public float bulletSpeed = 100f;
 
+    [Header("Audio Settings")]
+    [SerializeField] private AudioClip[] shootClips;
+
     [Header("Shield Settings")]
     public GameObject shieldObject;
     public float shieldDuration = 60f;
 
     [Header("Input Buffer Settings")]
-    public float inputBufferTime = 0.1f;  // Time window to keep jump/shoot input active
+    public float inputBufferTime = 0.1f;
 
     private Rigidbody _rb;
     private SphereCollider _col;
+    private AudioSource _audioSource;
     private GameBehavior _gameManager;
 
     private float verticalInput;
     private float rotationInput;
     private float strafeInput;
 
-    private float jumpBufferTimer = 0f;
-    private float shootBufferTimer = 0f;
+    private float jumpBufferTimer;
+    private float shootBufferTimer;
 
-    private bool shieldActive = false;
+    private bool shieldActive;
     private Coroutine shieldRoutine;
 
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
         _col = GetComponent<SphereCollider>();
+        _audioSource = GetComponent<AudioSource>();
         _gameManager = GameObject.Find("Game Manager").GetComponent<GameBehavior>();
     }
 
@@ -60,51 +65,27 @@ public class PlayerBehavior : MonoBehaviour
         HandleMovement();
         HandleJump();
         HandleShooting();
-
-        // Update input buffer timers.
-        if (jumpBufferTimer > 0f)
-            jumpBufferTimer -= Time.fixedDeltaTime;
-        if (shootBufferTimer > 0f)
-            shootBufferTimer -= Time.fixedDeltaTime;
+        if (jumpBufferTimer > 0f) jumpBufferTimer -= Time.fixedDeltaTime;
+        if (shootBufferTimer > 0f) shootBufferTimer -= Time.fixedDeltaTime;
     }
 
-    // Capture player inputs and set buffer timers.
     private void HandleInput()
     {
         verticalInput = Input.GetAxis("Vertical") * moveSpeed;
-
-        // Q and E for rotation.
-        rotationInput = 0f;
-        if (Input.GetKey(KeyCode.Q))
-            rotationInput = -rotateSpeed;
-        if (Input.GetKey(KeyCode.E))
-            rotationInput = rotateSpeed;
-
-        // A and D for strafing.
-        strafeInput = 0f;
-        if (Input.GetKey(KeyCode.A))
-            strafeInput = -strafeSpeed;
-        if (Input.GetKey(KeyCode.D))
-            strafeInput = strafeSpeed;
-
-        // Buffer jump and shoot inputs.
-        if (Input.GetKeyDown(KeyCode.Space))
-            jumpBufferTimer = inputBufferTime;
-        if (Input.GetKeyDown(KeyCode.F))
-            shootBufferTimer = inputBufferTime;
+        rotationInput = Input.GetKey(KeyCode.Q) ? -rotateSpeed : (Input.GetKey(KeyCode.E) ? rotateSpeed : 0f);
+        strafeInput = Input.GetKey(KeyCode.A) ? -strafeSpeed : (Input.GetKey(KeyCode.D) ? strafeSpeed : 0f);
+        if (Input.GetKeyDown(KeyCode.Space)) jumpBufferTimer = inputBufferTime;
+        if (Input.GetKeyDown(KeyCode.F)) shootBufferTimer = inputBufferTime;
     }
 
-    // Handle movement and rotation.
     private void HandleMovement()
     {
-        Quaternion deltaRotation = Quaternion.Euler(Vector3.up * rotationInput * Time.fixedDeltaTime);
-        _rb.MoveRotation(_rb.rotation * deltaRotation);
-
-        Vector3 movement = (transform.forward * verticalInput + transform.right * strafeInput) * Time.fixedDeltaTime;
-        _rb.MovePosition(_rb.position + movement);
+        Quaternion deltaRot = Quaternion.Euler(Vector3.up * rotationInput * Time.fixedDeltaTime);
+        _rb.MoveRotation(_rb.rotation * deltaRot);
+        Vector3 move = (transform.forward * verticalInput + transform.right * strafeInput) * Time.fixedDeltaTime;
+        _rb.MovePosition(_rb.position + move);
     }
 
-    // If jump is buffered and the player is grounded, perform jump.
     private void HandleJump()
     {
         if (jumpBufferTimer > 0f && IsGrounded())
@@ -114,24 +95,32 @@ public class PlayerBehavior : MonoBehaviour
         }
     }
 
-    // If shoot is buffered, fire the bullet.
     private void HandleShooting()
     {
         if (shootBufferTimer > 0f)
         {
+            // Play random shoot sound
+            if (shootClips != null && shootClips.Length > 0)
+            {
+                int idx = Random.Range(0, shootClips.Length);
+                _audioSource.PlayOneShot(shootClips[idx]);
+            }
+
+            // Instantiate and fire bullet
             GameObject newBullet = Instantiate(bullet, transform.position + transform.forward,
                 transform.rotation * Quaternion.Euler(90, 0, 0));
             Rigidbody bulletRB = newBullet.GetComponent<Rigidbody>();
             bulletRB.velocity = transform.forward * bulletSpeed;
+
             shootBufferTimer = 0f;
         }
     }
 
-    // Check if the player is grounded using a capsule check.
     private bool IsGrounded()
     {
-        Vector3 sphereBottom = new Vector3(_col.bounds.center.x, _col.bounds.min.y, _col.bounds.center.z);
-        return Physics.CheckCapsule(_col.bounds.center, sphereBottom, distanceToGround, groundLayer, QueryTriggerInteraction.Ignore);
+        Vector3 bottom = new Vector3(_col.bounds.center.x, _col.bounds.min.y, _col.bounds.center.z);
+        return Physics.CheckCapsule(_col.bounds.center, bottom, distanceToGround, groundLayer,
+            QueryTriggerInteraction.Ignore);
     }
 
     public void ActivateSpeedBoost(float multiplier, float duration)
